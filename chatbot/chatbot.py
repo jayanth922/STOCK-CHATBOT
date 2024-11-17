@@ -24,4 +24,4 @@ if __name__ == "__main__":
             print("Goodbye!")
             break
         response = bot.ask(user_input)
-        print(f"Bot: {response}")
+        print(f"Bot: {response}") #

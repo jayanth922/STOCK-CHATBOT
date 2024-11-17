@@ -5,7 +5,7 @@ from langchain.chat_models import ChatOpenAI
 class StockChatbot:
     def __init__(self):
         self.memory = ConversationBufferMemory()
-        self.chat_model = ChatOpenAI(model="gpt-3.5-turbo")  # You can adjust the model
+        self.chat_model = ChatOpenAI(model="gpt-3.5-turbo")
         
         self.chain = ConversationChain(
             llm=self.chat_model,

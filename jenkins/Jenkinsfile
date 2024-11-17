@@ -1,17 +1,58 @@
 pipeline {
     agent any
+    
+    environment {
+        // Load environment variables from .env if required
+        PATH = "${env.WORKSPACE}\\venv\\Scripts;${env.PATH}"
+    }
+
     stages {
-        stage('Install Dependencies') {
+        stage('Clone Repository') {
             steps {
-                bat 'python -m pip install -r requirements.txt'
+                script {
+                    echo "Cloning the repository"
+                }
+                checkout scm
             }
         }
+
+        stage('Setup Virtual Environment') {
+            steps {
+                script {
+                    // Check if venv exists, otherwise create it
+                    bat '''
+                    if not exist venv (
+                        python -m venv venv
+                    )
+                    '''
+                }
+            }
+        }
+
+        stage('Install Dependencies') {
+            steps {
+                bat '''
+                venv\\Scripts\\pip install --upgrade pip
+                venv\\Scripts\\pip install -r requirements.txt
+                '''
+            }
+        }
+
         stage('Run Tests') {
             steps {
-                bat 'python -m unittest discover tests'
+                bat 'venv\\Scripts\\python -m unittest discover tests'
+            }
+        }
+
+        stage('Build Chatbot') {
+            steps {
+                script {
+                    echo "Chatbot setup completed successfully!"
+                }
             }
         }
     }
+
     triggers {
         githubPush()
     }

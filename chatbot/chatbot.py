@@ -2,7 +2,7 @@ from langchain_openai import ChatOpenAI
 from langchain.memory import ConversationBufferMemory
 from langchain.chains import ConversationChain
 
-from dotenv import load_dotenv
+from dotenv import load_dotenv ##
 import os
 
 load_dotenv()

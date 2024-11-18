@@ -1,59 +1,52 @@
 pipeline {
     agent any
-    
+
     environment {
-        // Load environment variables from .env if required
-        PATH = "${env.WORKSPACE}\\venv\\Scripts;${env.PATH}"
+        PYTHON_VERSION = '3.12'
+        VENV_DIR = 'venv'
     }
 
     stages {
-        stage('Clone Repository') {
+        stage('Checkout') {
             steps {
-                script {
-                    echo "Cloning the repository"
-                }
+                echo 'Checking out the code...'
                 checkout scm
             }
         }
 
-        stage('Setup Virtual Environment') {
+        stage('Setup Python Environment') {
             steps {
-                script {
-                    // Check if venv exists, otherwise create it
-                    bat '''
-                    if not exist venv (
-                        python -m venv venv
-                    )
-                    '''
-                }
-            }
-        }
-
-        stage('Install Dependencies') {
-            steps {
+                echo 'Setting up Python virtual environment...'
                 bat '''
-                venv\\Scripts\\pip install --upgrade pip
-                venv\\Scripts\\pip install -r requirements.txt
+                python${PYTHON_VERSION} -m venv ${VENV_DIR}
+                ${VENV_DIR}\\Scripts\\activate
+                pip install --upgrade pip
+                pip install -r requirements.txt
                 '''
             }
         }
 
         stage('Run Tests') {
             steps {
-                bat 'venv\\Scripts\\python -m unittest discover tests'
-            }
-        }
-
-        stage('Build Chatbot') {
-            steps {
-                script {
-                    echo "Chatbot setup completed successfully!"
-                }
+                echo 'Running tests...'
+                bat '''
+                ${VENV_DIR}\\Scripts\\activate
+                python -m unittest discover -s tests -p "*.py"
+                '''
             }
         }
     }
 
-    triggers {
-        githubPush()
+    post {
+        always {
+            echo 'Cleaning up workspace...'
+            cleanWs()
+        }
+        success {
+            echo 'Tests passed successfully!'
+        }
+        failure {
+            echo 'Tests failed. Please check the logs.'
+        }
     }
 }

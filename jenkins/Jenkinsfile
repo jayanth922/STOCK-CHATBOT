@@ -2,37 +2,36 @@ pipeline {
     agent any
 
     environment {
-        PYTHON_VERSION = '3.12'
         VENV_DIR = 'venv'
     }
 
     stages {
         stage('Checkout') {
             steps {
-                echo 'Checking out the code...'
+                echo 'Checking out the repository...'
                 checkout scm
             }
         }
 
-        stage('Setup Python Environment') {
+        stage('Set Up Virtual Environment') {
             steps {
                 echo 'Setting up Python virtual environment...'
-                bat '''
-                python${PYTHON_VERSION} -m venv ${VENV_DIR}
-                ${VENV_DIR}\\Scripts\\activate
+                bat """
+                python -m venv %VENV_DIR%
+                %VENV_DIR%\\Scripts\\activate
                 pip install --upgrade pip
                 pip install -r requirements.txt
-                '''
+                """
             }
         }
 
         stage('Run Tests') {
             steps {
-                echo 'Running tests...'
-                bat '''
-                ${VENV_DIR}\\Scripts\\activate
+                echo 'Running test cases...'
+                bat """
+                %VENV_DIR%\\Scripts\\activate
                 python -m unittest discover -s tests -p "*.py"
-                '''
+                """
             }
         }
     }
@@ -43,10 +42,10 @@ pipeline {
             cleanWs()
         }
         success {
-            echo 'Tests passed successfully!'
+            echo 'All tests passed successfully!'
         }
         failure {
-            echo 'Tests failed. Please check the logs.'
+            echo 'Some tests failed. Please check the logs.'
         }
     }
 }
